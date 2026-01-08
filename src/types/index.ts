@@ -1,12 +1,13 @@
 export interface Note {
-    id: string;
+    id: number;
     title: string;
     content: string;
     archived: boolean;
     date: Date;
+    categories: Category[];
 }
 export interface Category {
-    id: string;
+    id: number;
     name: string;
     description: string;
 }

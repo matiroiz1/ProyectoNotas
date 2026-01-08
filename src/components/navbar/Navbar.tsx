@@ -1,4 +1,8 @@
-import { Container, Nav, Navbar as NavbarBootstrap } from 'react-bootstrap';
+import { useState } from 'react';
+import { Container, Nav, Navbar as NavbarBootstrap, Button } from 'react-bootstrap';
+import NoteModal from '../noteModal/NoteModal';
+
+const [showModal, setShowModal] = useState(false);
 
 export default function Navbar() {
 
@@ -9,11 +13,13 @@ export default function Navbar() {
                 <NavbarBootstrap.Toggle aria-controls="basic-navbar-nav" />
                 <NavbarBootstrap.Collapse id="basic-navbar-nav">
                     <Nav className="me-auto">
-                        <Nav.Link href="#home">Active</Nav.Link>
-                        <Nav.Link href="#link">Archived</Nav.Link>
-                        <Nav.Link href="#link">Categories</Nav.Link>
+                        <Nav.Link href="/">Active</Nav.Link>
+                        <Nav.Link href="/archived">Archived</Nav.Link>
+                        <Nav.Link href="/categories">Categories</Nav.Link>
                     </Nav>
                 </NavbarBootstrap.Collapse>
+                <Button variant="primary" onClick={() => setShowModal(true)}>New Note</Button>
+                <NoteModal show={showModal} onHide={() => setShowModal(false)} />
             </Container>
         </NavbarBootstrap>
     );

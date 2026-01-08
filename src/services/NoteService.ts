@@ -35,4 +35,10 @@ export const noteService = {
         const res = await api.get<Note[]>("/notes/active");
         return res.data;
     },
+
+    // GET ARCHIVED: GET /api/notes/archived
+    getArchivedNotes: async (): Promise<Note[]> => {
+        const res = await api.get<Note[]>("/notes/archived");
+        return res.data;
+    },
 };

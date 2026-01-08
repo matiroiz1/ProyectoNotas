@@ -6,79 +6,35 @@ import { noteService } from '../../services/NoteService';
 
 type NoteCardProps = {
     note: Note;
-    onChanged: () => void; // el padre recarga la lista
-};
+    onChanged: () => void; // Esta es la función loadNotes que viene del padre
+}
 
 function NoteCard({ note, onChanged }: NoteCardProps) {
-    const [loading, setLoading] = useState(false);
 
-    const handleEdit = async () => {
-        const newTitle = prompt('Nuevo título:', note.title);
-        if (newTitle === null) return;
+    const handleArchive = async()=>{
+        await noteService.toggleArchive(note.id);
+        onChanged();
+    }
 
-        const newContent = prompt('Nuevo contenido:', note.content);
-        if (newContent === null) return;
-
-        try {
-            setLoading(true);
-            await noteService.updateNote(note.id, { title: newTitle, content: newContent });
-            onChanged();
-        } catch (err) {
-            console.error(err);
-            alert('Error al actualizar la nota');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleArchive = async () => {
-        try {
-            setLoading(true);
-            await noteService.toggleArchive(note.id);
-            onChanged();
-        } catch (err) {
-            console.error(err);
-            alert('Error al archivar/desarchivar la nota');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleDelete = async () => {
-        const ok = confirm('¿Seguro que querés eliminar esta nota?');
-        if (!ok) return;
-
-        try {
-            setLoading(true);
-            await noteService.deleteNote(note.id);
-            onChanged();
-        } catch (err) {
-            console.error(err);
-            alert('Error al eliminar la nota');
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    const handleDelete = async()=>{
+        await noteService.deleteNote(note.id);
+        onChanged();
+    }
+    const handleEdit = async() => {
+        await noteService.updateNote(note.id, note);
+        onChanged();
+    }
     return (
         <Card style={{ width: '18rem' }}>
+            <Card.Img variant="top" src="holder.js/100px180" />
             <Card.Body>
                 <Card.Title>{note.title}</Card.Title>
                 <Card.Text>{note.content}</Card.Text>
-
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <Button variant="outline-primary" onClick={handleEdit} disabled={loading}>
-                        Edit
-                    </Button>
-
-                    <Button variant="outline-secondary" onClick={handleArchive} disabled={loading}>
-                        {note.archived ? 'Unarchive' : 'Archive'}
-                    </Button>
-
-                    <Button variant="outline-danger" onClick={handleDelete} disabled={loading}>
-                        Delete
-                    </Button>
-                </div>
+                <Button variant="primary" onClick={handleEdit}>Edit</Button>
+                <Button variant="secondary" onClick={handleArchive}>
+                    {note.archived?'Unarchive':'Archive'}
+                </Button>
+                <Button variant="danger" onClick={handleDelete}>Delete</Button>
             </Card.Body>
         </Card>
     );

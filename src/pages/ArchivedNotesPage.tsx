@@ -3,23 +3,17 @@ import NoteCard from "../components/noteCard/NoteCard";
 import { noteService } from "../services/NoteService";
 import type { Note } from "../types";
 
-type HomeProps = {
-    showArchived: boolean;
-}
-
-export default function ArchivedNotesPage({ showArchived }: HomeProps) {
+export default function ArchivedNotesPage() {
     const [notes, setNotes] = useState<Note[]>([]);
 
     const loadNotes = async () => {
-        const data = showArchived
-            ? await noteService.getArchivedNotes()
-            : await noteService.getActiveNotes();
+        const data = await noteService.getArchivedNotes();
         setNotes(data);
     };
 
     useEffect(() => {
         loadNotes();
-    }, [showArchived]);
+    }, []);
 
     return (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", padding: 16 }}>
