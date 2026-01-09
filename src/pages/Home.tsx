@@ -5,9 +5,10 @@ import type { Note } from "../types";
 
 type HomeProps = {
     showArchived: boolean;
-}
+    onEditNote: (id: number) => void;
+};
 
-export default function ArchivedNotesPage({ showArchived }: HomeProps) {
+export default function Home({ showArchived, onEditNote }: HomeProps) {
     const [notes, setNotes] = useState<Note[]>([]);
 
     const loadNotes = async () => {
@@ -24,7 +25,12 @@ export default function ArchivedNotesPage({ showArchived }: HomeProps) {
     return (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", padding: 16 }}>
             {notes.map((note) => (
-                <NoteCard key={note.id} note={note} onChanged={loadNotes} />
+                <NoteCard
+                    key={note.id}
+                    note={note}
+                    onChanged={loadNotes}
+                    onEdit={onEditNote}
+                />
             ))}
         </div>
     );

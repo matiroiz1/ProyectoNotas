@@ -41,4 +41,9 @@ export const noteService = {
         const res = await api.get<Note[]>("/notes/archived");
         return res.data;
     },
+    // GET BY ID: GET /api/notes/{id}
+    getNoteById: async (id: number): Promise<Note> => {
+        const res = await api.get<Note>(`/notes/${id}`);
+        return res.data;
+    },
 };
