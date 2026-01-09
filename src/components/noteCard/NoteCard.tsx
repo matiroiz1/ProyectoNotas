@@ -113,7 +113,7 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
             </Button>
 
             <Button
-              variant="secondary"
+              variant={note.archived ? "success" : "warning"}
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
