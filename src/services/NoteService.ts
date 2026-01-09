@@ -1,5 +1,5 @@
 import api from "../api/axios";
-import type { Note } from "../types";
+import type { Category, Note, NoteWithCategoriesDTO } from "../types";
 
 export type CreateNotePayload = {
     title: string;
@@ -30,20 +30,23 @@ export const noteService = {
         await api.delete(`/notes/${id}`);
     },
 
-    // GET: GET /api/notes
-    getActiveNotes: async (): Promise<Note[]> => {
-        const res = await api.get<Note[]>("/notes/active");
+    getActiveNotes: async (): Promise<NoteWithCategoriesDTO[]> => {
+        const res = await api.get<NoteWithCategoriesDTO[]>("/notes/active");
         return res.data;
     },
 
-    // GET ARCHIVED: GET /api/notes/archived
-    getArchivedNotes: async (): Promise<Note[]> => {
-        const res = await api.get<Note[]>("/notes/archived");
+    getArchivedNotes: async (): Promise<NoteWithCategoriesDTO[]> => {
+        const res = await api.get<NoteWithCategoriesDTO[]>("/notes/archived");
         return res.data;
     },
     // GET BY ID: GET /api/notes/{id}
     getNoteById: async (id: number): Promise<Note> => {
         const res = await api.get<Note>(`/notes/${id}`);
+        return res.data;
+    },
+    // GET NOTE CATEGORIES: GET /api/notes/{id}/categories
+    getNoteCategories: async (id: number): Promise<Category[]> => {
+        const res = await api.get<Category[]>(`/notes/${id}/categories`);
         return res.data;
     },
 };

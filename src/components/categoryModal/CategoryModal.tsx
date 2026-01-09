@@ -1,6 +1,6 @@
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import type { Note, Category } from '../../types/index.ts';
+import type { Category } from '../../types/index.ts';
 import Modal from 'react-bootstrap/Modal';
 import { categoryService } from '../../services/CategoryService.ts';
 
@@ -9,11 +9,10 @@ type CategoryModalProps = {
     show: boolean;
     onHide: () => void;
     onChange: (category: Category) => void;
-    categories: Category[];
 }
 
 
-function CategoryModal({ category, show, onHide, onChange, categories }: CategoryModalProps) {
+function CategoryModal({ category, show, onHide, onChange }: CategoryModalProps) {
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,17 +35,21 @@ function CategoryModal({ category, show, onHide, onChange, categories }: Categor
     return (
         <Modal show={show} onHide={onHide} centered>
             <Modal.Header closeButton>
-                <Modal.Title>{category.id ? 'Edit Category' : 'Create Category'}</Modal.Title>
+                <Modal.Title style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '1.2rem' }}>{category.id ? "✎" : "＋"}</span>
+                    <span>{category.id ? 'Edit Category' : 'Create Category'}</span>
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form onSubmit={handleSubmit}>
                     <Form.Group className="mb-3">
                         <Form.Label>Name</Form.Label>
                         <Form.Control
-                            placeholder="Write a Title here..."
+                            placeholder="Enter category name..."
                             value={category.name || ''}
                             onChange={(e) => onChange({ ...category, name: e.target.value })}
                             required
+                            style={{ fontSize: '1rem' }}
                         />
                     </Form.Group>
 
@@ -54,18 +57,20 @@ function CategoryModal({ category, show, onHide, onChange, categories }: Categor
                         <Form.Label>Description</Form.Label>
                         <Form.Control
                             as="textarea"
-                            rows={3}
-                            placeholder="Explain yourself..."
+                            rows={4}
+                            placeholder="Enter category description..."
                             value={category.description || ''}
                             onChange={(e) => onChange({ ...category, description: e.target.value })}
                             required
+                            style={{ fontSize: '1rem', resize: 'vertical' }}
                         />
                     </Form.Group>
 
-                    <div className="d-flex justify-content-end gap-2">
+                    <div className="d-flex justify-content-end gap-2" style={{ marginTop: '24px' }}>
                         <Button variant="secondary" onClick={onHide}>Cancel</Button>
-                        <Button variant="primary" type="submit">
-                            {category.id ? 'Save Changes' : 'Create Category'}
+                        <Button variant="primary" type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>{category.id ? "✓" : "＋"}</span>
+                            <span>{category.id ? 'Save Changes' : 'Create Category'}</span>
                         </Button>
                     </div>
                 </Form>

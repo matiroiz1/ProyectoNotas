@@ -17,14 +17,28 @@ export default function Category() {
     }, []);
 
     return (
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", padding: 16 }}>
-            {categories.map((category) => (
-                <CategoryCard
-                    key={category.id}
-                    category={category}
-                    onChanged={loadCategories}
-                />
-            ))}
+        <div className="main-container">
+            {categories.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-state-icon">◉</div>
+                    <h3 style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                        No categories
+                    </h3>
+                    <p style={{ color: 'var(--text-muted)' }}>
+                        Create your first category to organize your notes!
+                    </p>
+                </div>
+            ) : (
+                <div className="cards-grid">
+                    {categories.map((category) => (
+                        <CategoryCard
+                            key={category.id}
+                            category={category}
+                            onChanged={loadCategories}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
