@@ -14,14 +14,33 @@ function CategoryCard({ category, onChanged, onEdit }: CategoryCardProps) {
     const handleDelete = async () => {
         try {
             await categoryService.deleteCategory(category.id);
-            onChanged();
+            await onChanged();
         } catch (err: any) {
-            if (err?.response?.status === 409) {
-                alert("No se puede borrar la categoría: primero sacá las notas asociadas.");
-            } else {
-                console.error(err);
-                alert("Error al borrar la categoría.");
+            const status = err?.response?.status;
+
+            if (status === 409) {
+                window.dispatchEvent(
+                    new CustomEvent("appError", {
+                        detail: {
+                            title: "Cannot delete category",
+                            message: "This category has associated notes. Remove the notes from the category first.",
+                            variant: "warning",
+                        },
+                    })
+                );
+                return;
             }
+
+            window.dispatchEvent(
+                new CustomEvent("appError", {
+                    detail: {
+                        title: "Delete failed",
+                        message: "Something went wrong while deleting the category. Please try again.",
+                        variant: "danger",
+                    },
+                })
+            );
+            console.error(err);
         }
     };
 
