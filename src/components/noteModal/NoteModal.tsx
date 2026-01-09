@@ -45,29 +45,63 @@ function NoteModal({ note, show, onHide, onChange, categories }: NoteModalProps)
         const toRemove = initialCategoryIds.filter((id) => !selected.has(id));
         const toAdd = selectedCategoryIds.filter((id) => !initial.has(id));
 
-        await Promise.all(toRemove.map((catId) => categoryService.removeNoteFromCategory(catId, note.id)));
-        await Promise.all(toAdd.map((catId) => categoryService.addNoteToCategory(catId, note.id)));
+        // Procesa removals secuencialmente con manejo de errores
+        for (const catId of toRemove) {
+          try {
+            console.log(`Removiendo categoría ${catId} de la nota ${note.id}`);
+            await categoryService.removeNoteFromCategory(catId, note.id);
+            console.log(`Categoría ${catId} removida exitosamente`);
+          } catch (err) {
+            console.error(`Error al remover categoría ${catId}:`, err);
+          }
+        }
+
+        // Procesa additions secuencialmente con manejo de errores
+        for (const catId of toAdd) {
+          try {
+            console.log(`Agregando categoría ${catId} a la nota ${note.id}`);
+            await categoryService.addNoteToCategory(catId, note.id);
+            console.log(`Categoría ${catId} agregada exitosamente`);
+          } catch (err) {
+            console.error(`Error al agregar categoría ${catId}:`, err);
+          }
+        }
       } else {
         // CREATE
         const created = await noteService.createNote({ title: note.title, content: note.content });
 
         // asignar 0..N categorías
-        await Promise.all(
-          selectedCategoryIds.map((catId) => categoryService.addNoteToCategory(catId, created.id))
-        );
+        for (const catId of selectedCategoryIds) {
+          try {
+            await categoryService.addNoteToCategory(catId, created.id);
+          } catch (err) {
+            console.error(`Error al agregar categoría ${catId} a nota nueva:`, err);
+          }
+        }
       }
 
       onHide();
+      // notify other parts of the app that notes changed (create/update)
+      window.dispatchEvent(new Event("notesChanged"));
     } catch (error) {
-      console.error("Error al guardar:", error);
+      console.error("Error saving note:", error);
+      window.dispatchEvent(
+        new CustomEvent("appError", {
+          detail: {
+            title: "Save Error",
+            message: "Failed to save the note. Please try again.",
+            variant: "danger",
+          },
+        })
+      );
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
+    <Modal show={show} onHide={onHide} centered className="note-modal">
       <Modal.Header closeButton>
         <Modal.Title style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '1.2rem' }}>{note.id ? "✎" : "＋"}</span>
+          <i className={`bi ${note.id ? 'bi-pencil-fill' : 'bi-plus'}`} style={{ fontSize: '1.2rem' }}></i>
           <span>{note.id ? "Edit Note" : "Create Note"}</span>
         </Modal.Title>
       </Modal.Header>
@@ -100,29 +134,53 @@ function NoteModal({ note, show, onHide, onChange, categories }: NoteModalProps)
 
           <Form.Group className="mb-3">
             <Form.Label>Categories (Optional)</Form.Label>
-            <Form.Select
-              multiple
-              value={selectedCategoryIds.map(String)}
-              onChange={(e) => {
-                const values = Array.from(e.currentTarget.selectedOptions).map((opt) => Number(opt.value));
-                setSelectedCategoryIds(values);
-              }}
-              style={{ minHeight: '100px' }}
-            >
+            <div className="categories-list" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {categories.length > 0 ? (
                 categories.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      if (selectedCategoryIds.includes(c.id)) {
+                        setSelectedCategoryIds(selectedCategoryIds.filter(id => id !== c.id));
+                      } else {
+                        setSelectedCategoryIds([...selectedCategoryIds, c.id]);
+                      }
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '20px',
+                      border: 'none',
+                      backgroundColor: selectedCategoryIds.includes(c.id) ? 'var(--primary-color)' : 'var(--bg-secondary)',
+                      color: selectedCategoryIds.includes(c.id) ? 'white' : 'var(--text-secondary)',
+                      cursor: 'pointer',
+                      fontWeight: selectedCategoryIds.includes(c.id) ? '600' : '500',
+                      transition: 'all 0.2s ease',
+                      borderWidth: selectedCategoryIds.includes(c.id) ? '0' : '1px',
+                      borderStyle: 'solid',
+                      borderColor: 'var(--border-color)',
+                      fontSize: '0.95rem'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!selectedCategoryIds.includes(c.id)) {
+                        e.currentTarget.style.backgroundColor = 'var(--border-color)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!selectedCategoryIds.includes(c.id)) {
+                        e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
+                      }
+                    }}
+                  >
                     {c.name}
-                  </option>
+                  </button>
                 ))
               ) : (
-                <option disabled>No categories available</option>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: 0 }}>
+                  No categories available
+                </p>
               )}
-            </Form.Select>
-
-            <Form.Text muted style={{ fontSize: '0.8rem', marginTop: '4px', display: 'block' }}>
-              Tip: Hold Ctrl (Windows) / Cmd (Mac) to select multiple categories.
-            </Form.Text>
+            </div>
           </Form.Group>
 
           <div className="d-flex justify-content-end gap-2" style={{ marginTop: '24px' }}>
@@ -130,7 +188,7 @@ function NoteModal({ note, show, onHide, onChange, categories }: NoteModalProps)
               Cancel
             </Button>
             <Button variant="primary" type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>{note.id ? "✓" : "＋"}</span>
+              <i className={`bi ${note.id ? 'bi-check' : 'bi-plus'}`}></i>
               <span>{note.id ? "Save Changes" : "Create Note"}</span>
             </Button>
           </div>

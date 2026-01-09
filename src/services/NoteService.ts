@@ -49,4 +49,16 @@ export const noteService = {
         const res = await api.get<Category[]>(`/notes/${id}/categories`);
         return res.data;
     },
+
+    //GET NOTES BY CATEGORY: GET /api/notes/category/{categoryName}
+    getNotesByCategory: async (
+        categoryName: string,
+        archived: boolean = false
+    ): Promise<NoteWithCategoriesDTO[]> => {
+        const res = await api.get<NoteWithCategoriesDTO[]>(
+            `/notes/category/${encodeURIComponent(categoryName)}`,
+            { params: { archived } }
+        );
+        return res.data;
+    },
 };

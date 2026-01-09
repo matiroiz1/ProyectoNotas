@@ -5,22 +5,32 @@ import { categoryService } from '../../services/CategoryService';
 
 type CategoryCardProps = {
     category: Category;
-    onChanged: () => void; // Esta es la función loadNotes que viene del padre
+    onChanged: () => void;
+    onEdit: (category: Category) => void;
 }
 
-function CategoryCard({ category, onChanged}: CategoryCardProps) {
+function CategoryCard({ category, onChanged, onEdit }: CategoryCardProps) {
 
-    const handleDelete = async()=>{
-        await categoryService.deleteCategory(category.id);
-        onChanged();
-    }
+    const handleDelete = async () => {
+        try {
+            await categoryService.deleteCategory(category.id);
+            onChanged();
+        } catch (err: any) {
+            if (err?.response?.status === 409) {
+                alert("No se puede borrar la categoría: primero sacá las notas asociadas.");
+            } else {
+                console.error(err);
+                alert("Error al borrar la categoría.");
+            }
+        }
+    };
 
     return (
         <Card style={{ width: '18rem', minHeight: '200px', display: 'flex', flexDirection: 'column' }}>
             <Card.Body style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '24px' }}>
-                <Card.Title style={{ 
-                    fontSize: '1.25rem', 
-                    fontWeight: 600, 
+                <Card.Title style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 600,
                     marginBottom: '12px',
                     display: 'flex',
                     alignItems: 'center',
@@ -29,7 +39,7 @@ function CategoryCard({ category, onChanged}: CategoryCardProps) {
                     <span style={{ fontSize: '1.3rem' }}>◉</span>
                     <span>{category.name}</span>
                 </Card.Title>
-                <Card.Text style={{ 
+                <Card.Text style={{
                     flex: 1,
                     color: 'var(--text-secondary)',
                     fontSize: '0.9rem',
@@ -38,16 +48,19 @@ function CategoryCard({ category, onChanged}: CategoryCardProps) {
                 }}>
                     {category.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>No description</span>}
                 </Card.Text>
-                <div style={{ 
-                    display: 'flex', 
-                    gap: '8px', 
+                <div style={{
+                    display: 'flex',
+                    gap: '8px',
                     marginTop: 'auto',
                     paddingTop: '16px',
                     borderTop: '1px solid var(--border-color)'
                 }}>
-                    <Button variant="primary" size="sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span>✎</span>
-                        <span>Edit</span>
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => onEdit(category)}
+                    >
+                        ✎ Edit
                     </Button>
                     <Button variant="danger" size="sm" onClick={handleDelete} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span>×</span>

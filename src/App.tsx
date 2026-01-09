@@ -8,6 +8,7 @@ import NoteModal from "./components/noteModal/NoteModal";
 import CategoryPage from "./pages/Category";
 import { categoryService } from "./services/CategoryService";
 import CategoryModal from "./components/categoryModal/CategoryModal";
+import ErrorContainer from "./components/alerts/ErrorContainer";
 
 export default function App() {
   const [showModal, setShowModal] = useState(false);
@@ -23,6 +24,21 @@ export default function App() {
       .catch(console.error);
   }, []);
 
+  // Listen for categories changes and refresh App-level categories (used by NoteModal)
+  useEffect(() => {
+    const handler = async () => {
+      try {
+        const data = await categoryService.getAllCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    window.addEventListener("categoriesChanged", handler);
+    return () => window.removeEventListener("categoriesChanged", handler);
+  }, []);
+
   const openCreate = () => {
     setNoteDraft({ title: "", content: "" } as Note);
     setShowModal(true);
@@ -34,9 +50,29 @@ export default function App() {
   };
 
   const openEdit = async (id: number) => {
-    const noteFromBack = await noteService.getNoteById(id);
-    setNoteDraft(noteFromBack);
-    setShowModal(true);
+    try {
+      const noteFromBack = await noteService.getNoteById(id);
+      
+      // Cargar las categorías de la nota si no vienen en la respuesta
+      if (!noteFromBack.categories || noteFromBack.categories.length === 0) {
+        const noteCategories = await noteService.getNoteCategories(id);
+        noteFromBack.categories = noteCategories;
+      }
+      
+      setNoteDraft(noteFromBack);
+      setShowModal(true);
+    } catch (err) {
+      console.error("Error cargando nota para editar:", err);
+      window.dispatchEvent(
+        new CustomEvent("appError", {
+          detail: {
+            title: "Load Error",
+            message: "Failed to load the note. Please try again.",
+            variant: "danger",
+          },
+        })
+      );
+    }
   };
 
   const closeModal = () => setShowModal(false);
@@ -45,6 +81,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar onCreateNote={openCreate} onCreateCategory={openCreateCategory} />
+
+      <ErrorContainer />
 
       <Routes>
         <Route path="/" element={<Home showArchived={false} onEditNote={openEdit} />} />

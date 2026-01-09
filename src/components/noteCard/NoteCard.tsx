@@ -15,6 +15,18 @@ type NoteCardProps = {
 function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
   const [showPreview, setShowPreview] = useState(false);
 
+  const formatDate = (date: Date | string | undefined): string => {
+    if (!date) return "Unknown date";
+    const d = new Date(date);
+    return d.toLocaleDateString("es-ES", { 
+      year: "numeric", 
+      month: "short", 
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+
   const handleArchive = async () => {
     await noteService.toggleArchive(note.id);
     onChanged();
@@ -33,7 +45,7 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
       >
         <Card.Body style={{ display: "flex", flexDirection: "column", flex: 1 }}>
           <Card.Title style={{ fontSize: "1.25rem", fontWeight: 600, marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "1.1rem" }}>📄</span>
+            <i className="bi bi-journal-bookmark-fill" style={{ fontSize: "1.2rem" }}></i>
             <span>{note.title}</span>
           </Card.Title>
 
@@ -68,10 +80,21 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
               : note.content || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No content</span>}
           </Card.Text>
 
+          <div style={{
+            fontSize: "0.75rem",
+            color: "var(--text-muted)",
+            marginTop: "12px",
+            paddingBottom: "12px",
+            borderBottom: "1px solid var(--border-color)"
+          }}>
+            <div>Created: {formatDate(note.creationDate)}</div>
+            {note.lastModifiedDate && <div>Modified: {formatDate(note.lastModifiedDate)}</div>}
+          </div>
+
           <div style={{ 
             display: "flex", 
-            gap: "8px", 
-            flexWrap: "wrap", 
+            gap: "8px",
+            justifyContent: "center",
             marginTop: "16px",
             paddingTop: "16px",
             borderTop: "1px solid var(--border-color)"
@@ -83,9 +106,9 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
                 e.stopPropagation();
                 onEdit(note.id);
               }}
-              style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
             >
-              <span>✎</span>
+              <i className="bi bi-pencil-fill"></i>
               <span>Edit</span>
             </Button>
 
@@ -96,9 +119,9 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
                 e.stopPropagation();
                 handleArchive();
               }}
-              style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
             >
-              <span>{note.archived ? "↩" : "◐"}</span>
+              <i className="bi bi-archive"></i>
               <span>{note.archived ? "Unarchive" : "Archive"}</span>
             </Button>
 
@@ -109,9 +132,9 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
                 e.stopPropagation();
                 handleDelete();
               }}
-              style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
             >
-              <span>×</span>
+              <i className="bi bi-trash3"></i>
               <span>Delete</span>
             </Button>
           </div>
@@ -122,7 +145,7 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
       <Modal show={showPreview} onHide={() => setShowPreview(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "1.2rem" }}>📄</span>
+            <i className="bi bi-journal-bookmark-fill" style={{ fontSize: "1.3rem" }}></i>
             <span>{note.title}</span>
           </Modal.Title>
         </Modal.Header>
@@ -145,9 +168,26 @@ function NoteCard({ note, onChanged, onEdit }: NoteCardProps) {
             whiteSpace: "pre-wrap", 
             color: "var(--text-secondary)",
             lineHeight: "1.6",
-            fontSize: "0.95rem"
+            fontSize: "0.95rem",
+            marginBottom: "16px"
           }}>
             {note.content || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>No content</span>}
+          </div>
+
+          <div style={{ 
+            paddingTop: "16px",
+            borderTop: "1px solid var(--border-color)",
+            fontSize: "0.85rem",
+            color: "var(--text-muted)"
+          }}>
+            <div style={{ marginBottom: "6px" }}>
+              <strong>Created:</strong> {formatDate(note.creationDate)}
+            </div>
+            {note.lastModifiedDate && (
+              <div>
+                <strong>Modified:</strong> {formatDate(note.lastModifiedDate)}
+              </div>
+            )}
           </div>
         </Modal.Body>
       </Modal>

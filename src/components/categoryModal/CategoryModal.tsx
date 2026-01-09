@@ -27,16 +27,18 @@ function CategoryModal({ category, show, onHide, onChange }: CategoryModalProps)
                 await categoryService.createCategory(category);
             }
             onHide();
+            // notify other parts of the app that categories changed
+            window.dispatchEvent(new Event("categoriesChanged"));
         } catch (error) {
             console.error("Error al guardar:", error);
         }
     };
 
     return (
-        <Modal show={show} onHide={onHide} centered>
+        <Modal show={show} onHide={onHide} centered className="category-modal">
             <Modal.Header closeButton>
                 <Modal.Title style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '1.2rem' }}>{category.id ? "✎" : "＋"}</span>
+                    <i className={`bi ${category.id ? 'bi-pencil-fill' : 'bi-plus'}`} style={{ fontSize: '1.2rem' }}></i>
                     <span>{category.id ? 'Edit Category' : 'Create Category'}</span>
                 </Modal.Title>
             </Modal.Header>
@@ -69,7 +71,7 @@ function CategoryModal({ category, show, onHide, onChange }: CategoryModalProps)
                     <div className="d-flex justify-content-end gap-2" style={{ marginTop: '24px' }}>
                         <Button variant="secondary" onClick={onHide}>Cancel</Button>
                         <Button variant="primary" type="submit" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span>{category.id ? "✓" : "＋"}</span>
+                            <i className={`bi ${category.id ? 'bi-check' : 'bi-plus'}`}></i>
                             <span>{category.id ? 'Save Changes' : 'Create Category'}</span>
                         </Button>
                     </div>

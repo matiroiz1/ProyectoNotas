@@ -1,5 +1,6 @@
 // Navbar.tsx
 import { Container, Nav, Navbar as NavbarBootstrap, Button } from "react-bootstrap";
+import ThemeSwitcher from "../theme/ThemeSwitcher";
 import { Link, useLocation } from "react-router-dom";
 
 
@@ -17,9 +18,9 @@ export default function Navbar({ onCreateNote, onCreateCategory }: Props) {
   return (
     <NavbarBootstrap expand="lg" className="bg-body-tertiary">
       <Container>
-        <NavbarBootstrap.Brand as={Link} to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '1.5rem' }}>📝</span>
-          <span>NotesApp</span>
+        <NavbarBootstrap.Brand as={Link} to="/" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <i className="bi bi-journal-bookmark-fill" style={{ fontSize: '2rem' }}></i>
+          <span style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>NotesApp</span>
         </NavbarBootstrap.Brand>
 
         <NavbarBootstrap.Toggle aria-controls="basic-navbar-nav" />
@@ -55,17 +56,20 @@ export default function Navbar({ onCreateNote, onCreateCategory }: Props) {
           </Nav>
         </NavbarBootstrap.Collapse>
 
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ThemeSwitcher />
         {isCategories ? (
-          <Button variant="primary" onClick={onCreateCategory} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>+</span>
+          <Button variant="primary" onClick={onCreateCategory} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <i className="bi bi-plus"></i>
             <span>New Category</span>
           </Button>
         ) : (
-          <Button variant="primary" onClick={onCreateNote} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>+</span>
+          <Button variant="primary" onClick={onCreateNote} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <i className="bi bi-plus"></i>
             <span>New Note</span>
           </Button>
         )}
+        </div>
       </Container>
     </NavbarBootstrap>
   );
